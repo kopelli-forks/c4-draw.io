@@ -6,68 +6,42 @@
  *
  * https://raw.githubusercontent.com/tobiashochguertel/draw-io/master/C4-drawIO.xml
  */
+const sidebar_id = 'c4';
+const sidebar_title = 'C4 Notation';
+
+const isC4 = (cell) => cell && cell.hasOwnProperty('c4') && cell['c4'] !== null;
+const isC4Model = (cell) => isC4(cell) && cell.hasOwnProperty('value') && cell['value'] && cell['value'].hasAttribute['c4Type'];
+const isC4Person = (cell) => isC4(cell) && cell.hasOwnProperty('value') && cell['value'].length === 0 && cell.getChildCount() === 2 && cell.getChildAt(0).value.getAttribute('c4Type') === 'body';
+const isC4SoftwareSystem = (cell) => isC4(cell) && cell.hasAttribute('c4Type') === 'SoftwareSystem';
+const isC4SoftwareSystemDependency = (cell) => isC4(cell) && cell.getAttribute('c4Type') === 'SoftwareSystemDependency';
+const isC4Relationship = (cell) => isC4(cell) && cell.getAttribute('c4Type') === 'Relationship';
+const registerCodec = (func) => {
+    const codec = new mxObjectCodec(new func());
+    codec.encode = (enc, obj) => {
+        try {
+            const data = enc.document.createElement(func.name);
+        } catch (e) {
+            (window.console && window.console.error(e));
+        }
+        return data;
+    }
+    codec.decode = () => new func();
+    mxCodecRegistry.register(codec);
+}
+
+const createSettingsIcon = () => {
+    const img = mxUtils.createImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAXCAYAAADgKtSgAAACpklEQVRIS7VVMU9TURg9nWiZoF0k1MQmlKCREhhowUHaScpWdYHoINUORoKTiT+AhMnE6IDigraL2g10amGhxaFGMJHQJiWxBJcWJl6Zas4H9/leH4VKwl2a13vv+c73nfN911ar1Wq4oGVrBpzxq9VDnYLd3gKbzXYmpabAs2s5bBWKCAwOIPstJ7/dXs/5wNMrGfh6e+BytgvA4pcU3J0d6PNdRWp5FZpWxdhoSPbKlT2sb2wieHPIEszC/H08iQNNQ6m0i1DwBhwOu4BPP3kgwUo7u+CZ4MiwBMlkc3C52tDqcODeRMQUwAROVvlCEbHohFz8mFyUw2SpsuA3A/AsAblHAnPzcXi7PAiNDOsBTOBMce5tAk+nJuWCceUL2/qnt+uKaY9EXrx8h9jDcRMJS1nIqFLZx51IWAB+rP+SsjB11p2sy+V9YUwNuD4ll+B0tplY838LuHLG/YnbOnA9I5WhCrAQ/4zuLg8C/gFrzenjjZ+bKO38QWYtp4s3M/vakqq6rQI8f/ZYHPNmPoE+3zW4Oy+h93qP9IEwV+Ixutfrkbpt5YtIr6yKuI0W60z29DwD5PNF6Ye7kTHRTAf/Xdo1NQbB6Rzl55MCUAs6xNhQvHfZ3WEGpyhkTSecm3lhW9jTDDpz1pxdRifQHUrA/6k5LUz30FHsbr3mxpTr3bL0NYVHUbN/lYDhW0d2PNUtRvDGPm+XWlKbcnnP5POmwE/rUAqlVv1EpNtmZl9hemqycYcezZZtxKLjMlsoMld4NGiZLenljIj2b7YkxAwNZwuBmKKmHUrqAX8/WtVUPGZF0Rc+JBEaGcKBVkV27TtcrnY4HC1gVxvXiY8FM6BQzcxzBmPJjIxVgKZfIpaLs4Nu8g/2n/8lqu/GC31DGw6XMzb+An4I4cvYKbPGAAAAAElFTkSuQmCC');
+    img.setAttribute('title', 'Settings');
+    img.style.cursor = 'pointer';
+    img.style.width = '16px';
+    img.style.height = '16px';
+    return img;
+}
+
+class C4Stylesheet extends mxStylesheet {
+}
+
 Draw.loadPlugin(function (ui) {
-    var sidebar_id = 'c4';
-    var sidebar_title = 'C4 Notation';
-
-    var c4Utils = {};
-    c4Utils.isC4 = function (cell) {
-        return (cell &&
-            cell.hasOwnProperty('c4') &&
-            (cell.c4 !== null));
-    };
-    c4Utils.isC4Model = function (cell) {
-        return (c4Utils.isC4(cell) &&
-            cell &&
-            cell.hasOwnProperty('value') &&
-            (cell.value &&
-                cell.value.hasAttribute('c4Type'))
-        );
-    };
-    c4Utils.isC4Person = function (cell) {
-        return (c4Utils.isC4(cell) &&
-            (cell.hasOwnProperty('value') &&
-                cell.value.length === 0 ) &&
-            cell.getChildCount() === 2 &&
-            cell.getChildAt(0).value.getAttribute('c4Type') === 'body');
-    };
-    c4Utils.isC4SoftwareSystem = function (cell) {
-        return (c4Utils.isC4(cell) &&
-            cell.getAttribute('c4Type') === 'SoftwareSystem');
-    };
-    c4Utils.isC4SoftwareSystemDependency = function (cell) {
-        return (c4Utils.isC4(cell) &&
-            cell.getAttribute('c4Type') === 'SoftwareSystemDependency');
-    };
-    c4Utils.isC4Relationship = function (cell) {
-        return (c4Utils.isC4(cell) &&
-            cell.getAttribute('c4Type') === 'Relationship');
-    };
-
-    c4Utils.createSettingsIcon = function () {
-        var img = mxUtils.createImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAXCAYAAADgKtSgAAACpklEQVRIS7VVMU9TURg9nWiZoF0k1MQmlKCREhhowUHaScpWdYHoINUORoKTiT+AhMnE6IDigraL2g10amGhxaFGMJHQJiWxBJcWJl6Zas4H9/leH4VKwl2a13vv+c73nfN911ar1Wq4oGVrBpzxq9VDnYLd3gKbzXYmpabAs2s5bBWKCAwOIPstJ7/dXs/5wNMrGfh6e+BytgvA4pcU3J0d6PNdRWp5FZpWxdhoSPbKlT2sb2wieHPIEszC/H08iQNNQ6m0i1DwBhwOu4BPP3kgwUo7u+CZ4MiwBMlkc3C52tDqcODeRMQUwAROVvlCEbHohFz8mFyUw2SpsuA3A/AsAblHAnPzcXi7PAiNDOsBTOBMce5tAk+nJuWCceUL2/qnt+uKaY9EXrx8h9jDcRMJS1nIqFLZx51IWAB+rP+SsjB11p2sy+V9YUwNuD4ll+B0tplY838LuHLG/YnbOnA9I5WhCrAQ/4zuLg8C/gFrzenjjZ+bKO38QWYtp4s3M/vakqq6rQI8f/ZYHPNmPoE+3zW4Oy+h93qP9IEwV+Ixutfrkbpt5YtIr6yKuI0W60z29DwD5PNF6Ye7kTHRTAf/Xdo1NQbB6Rzl55MCUAs6xNhQvHfZ3WEGpyhkTSecm3lhW9jTDDpz1pxdRifQHUrA/6k5LUz30FHsbr3mxpTr3bL0NYVHUbN/lYDhW0d2PNUtRvDGPm+XWlKbcnnP5POmwE/rUAqlVv1EpNtmZl9hemqycYcezZZtxKLjMlsoMld4NGiZLenljIj2b7YkxAwNZwuBmKKmHUrqAX8/WtVUPGZF0Rc+JBEaGcKBVkV27TtcrnY4HC1gVxvXiY8FM6BQzcxzBmPJjIxVgKZfIpaLs4Nu8g/2n/8lqu/GC31DGw6XMzb+An4I4cvYKbPGAAAAAElFTkSuQmCC');
-        img.setAttribute('title', 'Settings');
-        img.style.cursor = 'pointer';
-        img.style.width = '16px';
-        img.style.height = '16px';
-        return img;
-    };
-    c4Utils.registCodec = function (func) {
-        var codec = new mxObjectCodec(new func());
-        codec.encode = function (enc, obj) {
-            try {
-                var data = enc.document.createElement(func.name);
-            } catch (e) {
-                (window.console && console.error(e));
-            }
-            return data
-        };
-        codec.decode = function (dec, node, into) {
-            return new func();
-        };
-        mxCodecRegistry.register(codec);
-    };
-
     c4StateHandler = function (state) {
         mxVertexHandler.apply(this, arguments);
     };
@@ -80,7 +54,7 @@ Draw.loadPlugin(function (ui) {
         this.domNode.style.position = 'absolute';
         this.domNode.style.whiteSpace = 'nowrap';
         if (this.custom) this.custom.apply(this, arguments);
-        var img = c4Utils.createSettingsIcon();
+        var img = createSettingsIcon();
         mxEvent.addGestureListeners(img,
             mxUtils.bind(this, function (evt) {
                 mxEvent.consume(evt);
@@ -88,8 +62,8 @@ Draw.loadPlugin(function (ui) {
         );
         mxEvent.addListener(img, 'click',
             mxUtils.bind(this, function (evt) {
-                var isC4Person = c4Utils.isC4Person(this.state.cell);
-                if (isC4Person) {
+                var isPerson = isC4Person(this.state.cell);
+                if (isPerson) {
                     var cell = this.state.cell.getChildAt(0);
                     if (cell !== null) {
                         var dlg = new EditDataDialog(ui, cell);
@@ -97,7 +71,7 @@ Draw.loadPlugin(function (ui) {
                         dlg.init();
                     }
                 }
-                if (!isC4Person) {
+                if (!isPerson) {
                     ui.actions.get('editData').funct();
                 }
                 mxEvent.consume(evt);
@@ -154,7 +128,7 @@ Draw.loadPlugin(function (ui) {
         group.insert(body); // child: 0 !!
         return group;
     };
-    c4Utils.registCodec(C4Person);
+    registerCodec(C4Person);
 
     C4SoftwareSystem = function () {
     };
@@ -171,7 +145,7 @@ Draw.loadPlugin(function (ui) {
         c4SoftwareSystem.c4 = this;
         return c4SoftwareSystem;
     };
-    c4Utils.registCodec(C4SoftwareSystem);
+    registerCodec(C4SoftwareSystem);
 
     C4SoftwareSystemDependency = function () {
     };
@@ -188,7 +162,7 @@ Draw.loadPlugin(function (ui) {
         c4SoftwareSystemDependency.c4 = this;
         return c4SoftwareSystemDependency;
     };
-    c4Utils.registCodec(C4SoftwareSystemDependency);
+    registerCodec(C4SoftwareSystemDependency);
 
     C4Container = function () {
     };
@@ -206,7 +180,7 @@ Draw.loadPlugin(function (ui) {
         c4Container.c4 = this;
         return c4Container;
     };
-    c4Utils.registCodec(C4Container);
+    registerCodec(C4Container);
 
     C4Component = function () {
     };
@@ -224,7 +198,7 @@ Draw.loadPlugin(function (ui) {
         c4Component.c4 = this;
         return c4Component;
     };
-    c4Utils.registCodec(C4Component);
+    registerCodec(C4Component);
 
     C4ExecutionEnvironment = function () {
     };
@@ -241,7 +215,7 @@ Draw.loadPlugin(function (ui) {
         c4ExecutionEnvironment.c4 = this;
         return c4ExecutionEnvironment;
     };
-    c4Utils.registCodec(C4ExecutionEnvironment);
+    registerCodec(C4ExecutionEnvironment);
 
     C4DeploymentNode = function () {
     };
@@ -259,7 +233,7 @@ Draw.loadPlugin(function (ui) {
         c4DeploymentNode.c4 = this;
         return c4DeploymentNode;
     };
-    c4Utils.registCodec(C4DeploymentNode);
+    registerCodec(C4DeploymentNode);
 
     C4Database = function () {
     };
@@ -276,7 +250,7 @@ Draw.loadPlugin(function (ui) {
         c4Database.c4 = this;
         return c4Database;
     };
-    c4Utils.registCodec(C4Database);
+    registerCodec(C4Database);
 
     C4Relationship = function () {
     };
@@ -296,7 +270,20 @@ Draw.loadPlugin(function (ui) {
         cell.c4 = this;
         return cell;
     };
-    c4Utils.registCodec(C4Relationship);
+    registerCodec(C4Relationship);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // Adds custom sidebar entry
     ui.sidebar.addPalette(sidebar_id, sidebar_title, true, function (content) {
@@ -312,8 +299,8 @@ Draw.loadPlugin(function (ui) {
     // Add custom handler-code for the event of data-editor instanzing to provide a custom data-editor dialog.
     origGraphCreateHander = ui.editor.graph.createHandler;
     ui.editor.graph.createHandler = function (state) {
-        if (state !== null && (this.getSelectionCells().length === 1) && c4Utils.isC4(state.cell) && state.cell.c4.handler
-            && !c4Utils.isC4Relationship(state.cell)) {
+        if (state !== null && (this.getSelectionCells().length === 1) && isC4(state.cell) && state.cell.c4.handler
+            && !isC4Relationship(state.cell)) {
             return new state.cell.c4.handler(state);
         }
         return origGraphCreateHander.apply(this, arguments);
@@ -322,7 +309,7 @@ Draw.loadPlugin(function (ui) {
     // START -> CUSTOM EDITOR MENU!
     origEditDataDialog = EditDataDialog;
     EditDataDialog = function (ui, cell) {
-        if (!c4Utils.isC4(cell)) {
+        if (!isC4(cell)) {
             return origEditDataDialog.apply(this, arguments);
         }
         var div = document.createElement('div');
