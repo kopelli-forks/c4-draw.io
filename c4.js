@@ -43,7 +43,7 @@ class C4Stylesheet extends mxStylesheet {
 
 Draw.loadPlugin(function (ui) {
     const stylesheet = mxCodecRegistry.getCodec(mxStylesheet);
-    stylesheet.template.putCellStyle('person-group', {
+    stylesheet.template.putCellStyle('personGroup', {
         shape: 'group',
         rounded: 0,
         labelBackgroundColor: 'none',
@@ -51,7 +51,18 @@ Draw.loadPlugin(function (ui) {
         fontColor: '#ffffff',
         align: 'center',
         html: 1
-    })
+    });
+    stylesheet.template.putCellStyle('personBody', {
+        rounded: 1,
+        whiteSpace: 'wrap',
+        html: 1,
+        labelBackgroundColor: 'none',
+        fillColor: '#08427b',
+        fontColor: '#ffffff',
+        align: 'center',
+        arcSize: 33,
+        strokeColor: '#3c7fc0'
+    });
     window.console.log(stylesheet);
     c4StateHandler = function (state) {
         mxVertexHandler.apply(this, arguments);
@@ -115,12 +126,12 @@ Draw.loadPlugin(function (ui) {
     };
     C4Person.prototype.handler = c4StateHandler;
     C4Person.prototype.create = function () {
-        var group = new mxCell('', new mxGeometry(0, 0, 160, 180), 'person-group;');
+        var group = new mxCell('', new mxGeometry(0, 0, 160, 180), 'personGroup;');
         group.setVertex(true);
         group.setConnectable(false);
         group.setAttribute('c4Type', 'person');
         group.c4 = this;
-        var body = new mxCell('', new mxGeometry(0, 70, 160, 110), 'rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#08427b;fontColor=#ffffff;align=center;arcSize=33;strokeColor=3c7fc0;');
+        var body = new mxCell('', new mxGeometry(0, 70, 160, 110), 'personBody');
         body.setParent(group);
         body.setVertex(true);
         body.setValue(mxUtils.createXmlDocument().createElement('object'));
