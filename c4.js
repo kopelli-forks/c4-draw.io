@@ -42,6 +42,8 @@ class C4Stylesheet extends mxStylesheet {
 }
 
 Draw.loadPlugin(function (ui) {
+    const stylesheet = mxCodeRegistry.getCodec(mxStylesheet);
+    window.console.log(stylesheet);
     c4StateHandler = function (state) {
         mxVertexHandler.apply(this, arguments);
     };
