@@ -43,6 +43,15 @@ class C4Stylesheet extends mxStylesheet {
 
 Draw.loadPlugin(function (ui) {
     const stylesheet = mxCodecRegistry.getCodec(mxStylesheet);
+    stylesheet.template.putCellStyle('person-group', {
+        shape: 'group',
+        rounded: 0,
+        labelBackgroundColor: 'none',
+        fillColor: 'none',
+        fontColor: '#ffffff',
+        align: 'center',
+        html: 1
+    })
     window.console.log(stylesheet);
     c4StateHandler = function (state) {
         mxVertexHandler.apply(this, arguments);
@@ -106,7 +115,7 @@ Draw.loadPlugin(function (ui) {
     };
     C4Person.prototype.handler = c4StateHandler;
     C4Person.prototype.create = function () {
-        var group = new mxCell('', new mxGeometry(0, 0, 160, 180), 'group;rounded=0;labelBackgroundColor=none;fillColor=none;fontColor=#ffffff;align=center;html=1;');
+        var group = new mxCell('', new mxGeometry(0, 0, 160, 180), 'person-group;');
         group.setVertex(true);
         group.setConnectable(false);
         group.setAttribute('c4Type', 'person');
